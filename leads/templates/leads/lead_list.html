@@ -2,10 +2,12 @@
 {% block content %}
     <section class="text-gray-600 body-font">
   <div class="container px-5 py-24 mx-auto flex flex-wrap">
+
+  {% if request.user.is_organisor %}
   <div class="mb-6 inline-flex text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg">
-  
     <a href="{% url 'leads:lead-create' %}"> Create a new lead</a>
   </div>
+  {% endif %}
     <div class="flex flex-wrap -m-4">
         {% for lead in leads %}
       <div class="p-4 lg:w-1/2 md:w-full">

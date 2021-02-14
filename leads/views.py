@@ -5,18 +5,12 @@ from django.http import HttpResponse
 from django.views import generic 
 from .models import Lead, Agent
 from .forms import LeadForm, LeadModelForm, CustomUserCreateForm
-from django.contrib.auth.views import LogoutView
+from agents.mixins import OrganisorLoginRequiredMixin
+
 
 class SignupView(generic.CreateView):
     template_name = "registration/signup.html"
     form_class = CustomUserCreateForm  
-    
-    def get_success_url(self):
-        return reverse("login")
-
-class LogOutView(LoginRequiredMixin, LogoutView):
-    template_name = 'registration/logged_out.html'
-    form_class = CustomUserCreateForm
     
     def get_success_url(self):
         return reverse("login")
@@ -35,6 +29,12 @@ class LeadListView(LoginRequiredMixin, generic.ListView):
     model = Lead
     context_object_name = "leads"
     template_name = "leads/lead_list.html"
+
+    def get_queryset(self):
+        queryset = Lead.objects.all()
+        if self.request.uesr.is_agent:
+            queryset = queryset.filter(agent__user=self.request.user)
+        return queryset
 
 def lead_list(request):
     leads = Lead.objects.all()
@@ -63,7 +63,7 @@ def lead_detail(request, id):
 # #################
 
 
-class LeadCreateView(LoginRequiredMixin, generic.CreateView):
+class LeadCreateView(OrganisorLoginRequiredMixin, generic.CreateView):
     model = Lead
     pk_url_kwarg = 'id'
     template_name = "leads/lead_create.html"
@@ -98,7 +98,7 @@ def lead_create(request):
 # #################
 
 
-class LeadUpdateView(LoginRequiredMixin, generic.UpdateView):
+class LeadUpdateView(OrganisorLoginRequiredMixin, generic.UpdateView):
     model = Lead
     template_name = "leads/lead_update.html"
     pk_url_kwarg = 'id'
@@ -124,7 +124,7 @@ def lead_update(request, id):
 
 # #################
 
-class LeadDeleteView(LoginRequiredMixin, generic.DeleteView):
+class LeadDeleteView(OrganisorLoginRequiredMixin, generic.DeleteView):
     model = Lead
     template_name = "leads/lead_delete.html"
     pk_url_kwarg = 'id'
